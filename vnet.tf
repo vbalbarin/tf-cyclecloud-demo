@@ -128,9 +128,9 @@ module "virtualnetwork" {
   tags = var.tags
 }
 
-# output "vnet_subnets" {
-#   value = module.virtualnetwork.subnets
-# }
+output "vnet_subnets" {
+  value = module.virtualnetwork.subnets
+}
 
 # output "network_cidr_blocks" {
 #   value = module.subnet_addrs.network_cidr_blocks
