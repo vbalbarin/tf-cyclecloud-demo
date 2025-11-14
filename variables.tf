@@ -140,6 +140,11 @@ variable "remote_access_ip" {
   default = ""
 }
 
+variable "deploy_vm_cc" {
+  type    = bool
+  default = false
+}
+
 variable "deploy_dc" {
   type    = bool
   default = false
