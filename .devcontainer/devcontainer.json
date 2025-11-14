@@ -1,0 +1,60 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+	"name": "Ubuntu",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	// "image": "mcr.microsoft.com/devcontainers/base:jammy",
+    "build": {
+        // Path is relative to the devcontainer.json file.
+        "dockerfile": "Dockerfile"
+    },
+	// Uncomment the following and replace <username> with your username in WSL
+	// "mounts": [
+  	// 	{
+    // 	"source": "/home/<username>/.local/share/powershell/PSReadLine",
+    // 	"target": "/home/vscode/.local/share/powershell/PSReadLine",
+    // 	"type": "bind"
+  	// 	}
+	// ],
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-azuretools.vscode-bicep",
+				"ms-dotnettools.vscode-dotnet-runtime",
+				"ms-vscode.azurecli",
+				"HashiCorp.terraform"
+			],
+	  		"settings": {
+				"terminal.integrated.defaultProfile.linux":  "bash",
+				"terminal.integrated.profiles.linux": {
+            		"pwsh": {
+                		"path": "/usr/bin/pwsh"
+            		},
+					"bash": {
+						"path": "/usr/bin/bash"
+					}
+  				}
+			}
+		}
+	},
+
+	"mounts": [
+      "source=projectname-bashhistory,target=/commandhistory,type=volume"
+  	]
+
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "uname -a",
+
+	// Configure tool-specific properties.
+	// "customizations": {},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

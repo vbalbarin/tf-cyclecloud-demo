@@ -1,0 +1,14 @@
+**/.terraform
+
+.terraform.*
+*.tfstate*
+
+*.tfplan*
+*.tfvars
+
+backend.tf
+!sample.tfvars
+*.auto.tfvars
+
+*.skip
+*.bak
