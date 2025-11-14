@@ -62,6 +62,7 @@ module "virtualnetwork" {
       nat_gateway = var.deploy_natgw ? {
         id = module.nat_gateway[0].resource_id
       } : {}
+      service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault"]
       # route_table = var.deploy_firewall ? {
       #   id = module.rt[0].resource_id
       # } : {}
@@ -80,6 +81,7 @@ module "virtualnetwork" {
       nat_gateway = var.deploy_natgw ? {
         id = module.nat_gateway[0].resource_id
       } : {}
+      service_endpoints = ["Microsoft.Storage", "Microsoft.KeyVault"]
       # route_table = var.deploy_firewall ? {
       #   id = module.rt[0].resource_id
       # } : {}
