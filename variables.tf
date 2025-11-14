@@ -108,6 +108,8 @@ variable "resource_name_templates" {
     vm_cyclecloud_orchestrator = "vm-$${workload}-$${environment}-$${sequence}"
     vm_domain_controller       = "dc-$${workload}-$${environment}-$${sequence}"
     vm_domain_member           = "dm-$${workload}-$${environment}-$${sequence}"
+
+    userassigned_managed_identity_locker = "umi-$${workload}-locker-$${environment}-$${location_short}-$${sequence}"
     # storage_account_private_endpoint  = "pe-sto-$${workload}-$${environment}-$${location_short}-$${sequence}"
     # agent_compute_postfix             = "$${workload}-$${environment}-$${location_short}-$${sequence}"
     # container_instance_prefix         = "aci-$${workload}-$${environment}-$${location_short}"
