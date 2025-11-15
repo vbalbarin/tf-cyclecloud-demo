@@ -1,4 +1,4 @@
-module "avm-res-managedidentity-userassignedidentity" {
+module "umi_locker" {
   source  = "Azure/avm-res-managedidentity-userassignedidentity/azurerm"
   version = "0.3.4"
 
@@ -12,12 +12,12 @@ module "avm-res-managedidentity-userassignedidentity" {
 }
 
 output "userassigned_managed_identity_locker_resourceid" {
-  value = module.avm-res-managedidentity-userassignedidentity.resource.id
+  value = module.umi_locker.resource.id
 }
 
 resource "azurerm_role_assignment" "storage_blob_data_reader" {
   scope                            = module.storage.resource_id
   role_definition_name             = "Storage Blob Data Reader"
-  principal_id                     = module.avm-res-managedidentity-userassignedidentity.principal_id
+  principal_id                     = module.umi_locker.principal_id
   skip_service_principal_aad_check = false
 }
