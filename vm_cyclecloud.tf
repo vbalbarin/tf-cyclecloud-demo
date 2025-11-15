@@ -55,7 +55,7 @@ module "vm_cc" {
 
   data_disk_managed_disks = {
     disk1 = {
-      name                 = "disk-${local.resource_names["vm_cyclecloud_orchestrator"]}-lun0"
+      name = "disk-${local.resource_names["vm_cyclecloud_orchestrator"]}-lun0"
       # create_option        = "FromImage"
       storage_account_type = "Premium_LRS"
       disk_size_gb         = 512
@@ -87,14 +87,17 @@ module "vm_cc" {
 
   role_assignments_system_managed_identity = {
     role_assignment_1 = {
-      scope_resource_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}"
+      scope_resource_id          = "/subscriptions/${data.azurerm_client_config.current.subscription_id}"
       role_definition_id_or_name = azurerm_role_definition.cyclecloud_orchestrator.role_definition_resource_id
-      description = "Assign the Cycle Cloud Orchestrator to this VM"
-      principal_type = "ServicePrincipal"
+      description                = "Assign the Cycle Cloud Orchestrator to this VM"
+      principal_type             = "ServicePrincipal"
     }
-    # role_assignment_2 = {
-    #   scope_resource_id = 
-    # }
+    role_assignment_2 = {
+      scope_resource_id          = module.storage.resource_id
+      role_definition_id_or_name = "Storage Blob Data Contributor"
+      description                = "Assign Blob Storage Contributor to this VM over CycleCloud locker"
+      principal_type             = "ServicePrincipal"
+    }
   }
 
   enable_telemetry = var.telemetry_enabled
