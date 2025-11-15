@@ -1,37 +1,13 @@
-resource "random_string" "unique_name" {
-  length  = 3
-  special = false
-  upper   = false
-  numeric = false
-}
-
-data "azurerm_client_config" "current" {}
-
-locals {
-  user_principals    = [data.azurerm_client_config.current.object_id]
-  managed_identities = var.system_assigned_managed_id == "" ? [] : [var.system_assigned_managed_id]
-  any_principals     = toset(concat(local.user_principals, local.managed_identities))
-}
-
-
 resource "azurerm_role_assignment" "storage_account_contributor" {
-  for_each                         = local.user_principals
   scope                            = module.storage.resource_id
   role_definition_name             = "Storage Account Contributor"
-  principal_id                     = each.key
-  skip_service_principal_aad_check = false
-}
-
-resource "azurerm_role_assignment" "storage_blob_data_contributor" {
-  for_each                         = local.any_principals
-  scope                            = module.storage.containers["tfstate"].id
-  role_definition_name             = "Storage Blob Data Contributor"
-  principal_id                     = each.key
+  principal_id                     = data.azurerm_client_config.current.object_id
   skip_service_principal_aad_check = false
 }
 
 module "storage" {
   source = "Azure/avm-res-storage-storageaccount/azurerm"
+  version = "~> 0.5.0"
 
   name                = local.resource_names["storage_account_cyclecloud_locker"]
   location            = azurerm_resource_group.support.location
@@ -45,7 +21,7 @@ module "storage" {
 
   containers = {
     locker = {
-      name                  = "locker"
+      name                  = "cyclecloud"
       container_access_type = "private"
     }
   }
@@ -53,9 +29,10 @@ module "storage" {
   network_rules = {
     bypass         = ["AzureServices"]
     default_action = "Deny"
-    ip_rules       = [data.http.runner_ip.response_body]
+    ip_rules       = [data.http.runner_ip[0].response_body]
     virtual_network_subnet_ids = [
-        
+      module.virtualnetwork.subnets[local.subnet_names.cyclecloud].resource_id,
+      module.virtualnetwork.subnets[local.subnet_names.compute].resource_id
     ]
   }
 
