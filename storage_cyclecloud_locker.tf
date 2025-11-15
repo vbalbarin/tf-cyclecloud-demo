@@ -6,7 +6,7 @@ resource "azurerm_role_assignment" "storage_account_contributor" {
 }
 
 module "storage" {
-  source = "Azure/avm-res-storage-storageaccount/azurerm"
+  source  = "Azure/avm-res-storage-storageaccount/azurerm"
   version = "~> 0.5.0"
 
   name                = local.resource_names["storage_account_cyclecloud_locker"]

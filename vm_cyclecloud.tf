@@ -10,9 +10,6 @@ module "vm_cc" {
 
   tags = var.tags
 
-  # admin_password = random_password.vm_cyclecloud_orchestrator[0].result
-  # admin_username = "srvadmin"
-
   account_credentials = {
     admin_credentials = {
       username                           = "srvadmin"
@@ -27,16 +24,6 @@ module "vm_cc" {
   encryption_at_host_enabled = false
 
   extensions = {}
-
-
-  # Does not work b/c it has a data disk; terraform borksS
-  # source_image_reference = {
-  #   publisher = "azurecyclecloud"
-  #   offer     = "azure-cyclecloud"
-  #   sku       = "cyclecloud8-gen2"
-  #   version   = "8.7.320250909"
-  # }
-
 
   source_image_reference = {
     publisher = "almalinux"
@@ -67,8 +54,6 @@ module "vm_cc" {
   managed_identities = {
     system_assigned = true
   }
-
-  // LATER: Check storage profile: use standard SSD LRS
 
   network_interfaces = {
     network_interface_1 = {
