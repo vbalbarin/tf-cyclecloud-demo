@@ -9,6 +9,7 @@ data "cloudinit_config" "vm_cc_custom_data" {
     content_type = "text/cloud-config"
     content = templatefile("custom-data.yaml.tpl", {
       cyclecloud8_ver = var.cyclecloud8_ver
+      key_vault_name = module.key_vault.name
       # # Remove trailing newline from public key which causes yaml formatting issues
       # cyclecloud_admin_public_key  = chomp(azurerm_ssh_public_key.public_key.public_key)
       # cyclecloud_rg                = azurerm_resource_group.rg.name
