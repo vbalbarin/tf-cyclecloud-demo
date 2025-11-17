@@ -147,6 +147,11 @@ variable "deploy_vm_cc" {
   default = false
 }
 
+variable "cyclecloud8_ver" {
+  type    = string
+  default = "8.7.3-3438"
+}
+
 variable "deploy_dc" {
   type    = bool
   default = false
