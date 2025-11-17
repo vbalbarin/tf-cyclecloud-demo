@@ -1,3 +1,28 @@
+# cloud-init custom data
+#
+data "cloudinit_config" "vm_cc_custom_data" {
+  gzip          = false
+  base64_encode = true
+
+  part {
+    filename     = "cloud-config.yaml"
+    content_type = "text/cloud-config"
+    content = templatefile("custom-data.yaml.tpl", {
+      cyclecloud8_ver = var.cyclecloud8_ver
+      # # Remove trailing newline from public key which causes yaml formatting issues
+      # cyclecloud_admin_public_key  = chomp(azurerm_ssh_public_key.public_key.public_key)
+      # cyclecloud_rg                = azurerm_resource_group.rg.name
+      # cyclecloud_location          = azurerm_resource_group.rg.location
+      # cyclecloud_storage_account   = var.cyclecloud_storage_account
+      # cyclecloud_storage_container = var.cyclecloud_storage_container
+      # cyclecloud_subscription_name = var.cyclecloud_subscription_name
+      # azure_subscription_id        = data.azurerm_subscription.current.subscription_id
+      # azure_tenant_id              = data.azurerm_subscription.current.tenant_id
+    })
+  }
+}
+
+
 module "vm_cc" {
   count = var.deploy_vm_cc ? 1 : 0
 
@@ -39,6 +64,7 @@ module "vm_cc" {
     storage_account_type = "Premium_LRS"
   }
 
+  custom_data = data.cloudinit_config.vm_cc_custom_data.rendered
 
   data_disk_managed_disks = {
     disk1 = {
