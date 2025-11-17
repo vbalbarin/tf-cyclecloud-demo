@@ -1,5 +1,10 @@
 # cloud-init custom data
 #
+
+data "azurerm_subscription" "current" {
+  subscription_id = data.azurerm_client_config.current.subscription_id
+}
+
 data "cloudinit_config" "vm_cc_custom_data" {
   gzip          = false
   base64_encode = true
@@ -10,15 +15,12 @@ data "cloudinit_config" "vm_cc_custom_data" {
     content = templatefile("custom-data.yaml.tpl", {
       cyclecloud8_ver = var.cyclecloud8_ver
       key_vault_name = module.key_vault.name
-      # # Remove trailing newline from public key which causes yaml formatting issues
-      # cyclecloud_admin_public_key  = chomp(azurerm_ssh_public_key.public_key.public_key)
-      # cyclecloud_rg                = azurerm_resource_group.rg.name
-      # cyclecloud_location          = azurerm_resource_group.rg.location
-      # cyclecloud_storage_account   = var.cyclecloud_storage_account
-      # cyclecloud_storage_container = var.cyclecloud_storage_container
-      # cyclecloud_subscription_name = var.cyclecloud_subscription_name
-      # azure_subscription_id        = data.azurerm_subscription.current.subscription_id
-      # azure_tenant_id              = data.azurerm_subscription.current.tenant_id
+      cyclecloud8_subscription_name = data.azurerm_subscription.current.display_name
+      cyclecloud8_subscription_id = data.azurerm_client_config.current.subscription_id
+      cyclecloud8_compute_rg_name = azurerm_resource_group.cyclecloud_compute.name
+      cyclecloud8_compute_rg_locaton = azurerm_resource_group.cyclecloud_compute.location
+      cyclecloud8_umi_locker_resource_id = module.umi_locker.resource_id
+      cyclecloud8_storage_account_locker_name = module.storage.name
     })
   }
 }

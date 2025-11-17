@@ -62,7 +62,25 @@ write_files:
           "Value": true
         }
       ]
-
+  - path: /home/srvadmin/cyclecloud_provider.json
+    content: |
+      {
+        "AcceptMarketplaceTerms": true,
+        "AuthType": "ManagedIdentity",
+        "AzureRMClientId": null,
+        "AzureRMSubscriptionId": "${cyclecloud8_subscription_id}",
+        "AzureResourceGroup": "${cyclecloud8_compute_rg_name}",
+        "DefaultAccount": true,
+        "Location": "${cyclecloud8_compute_rg_locaton}",
+        "LockerAuthMode": "ManagedIdentity",
+        "LockerIdentity": "${cyclecloud8_umi_locker_resource_id}",
+        "RMStorageAccount": "${cyclecloud8_storage_account_locker_name}",
+        "RMStorageContainer": "cyclecloud",
+        "Name": "${cyclecloud8_subscription_name}",
+        "PredefinedCreds": true,
+        "Provider": "azure",
+        "ProviderId": "${cyclecloud8_subscription_id}"
+      }
 
 runcmd:
   - /opt/cycle_server/cycle_server stop
