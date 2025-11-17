@@ -35,12 +35,57 @@ packages:
   - azure-cli
   - cyclecloud8-${cyclecloud8_ver}
 
-# runcmd:
-#   - groupadd -g 20001 hpcadmin
-#   - useradd -g 20001 -u 20001 -m -s /bin/bash hpcadmin
-#   - passwd -d hpcadmin
-#   - su - hpcadmin -c "ssh-keygen -t ed25519 -N '' -f /home/hpcadmin/.ssh/id_ed25519"
-#   # - su - hpcadmin -c "cat /home/hpcadmin/.ssh/id_ed25519.pub >> /home/hpcadmin/.ssh/authorized_keys"
-#   # - su - hpcadmin -c "chmod 600 /home/hpcadmin/.ssh/authorized_keys"
-#   - su - hpcadmin -c "chmod 700 /home/hpcadmin/.ssh"
-#   - passwd -e hpcadmin
+write_files:
+  - path: /home/srvadmin/cyclecloud_account.json # cp . /opt/cycle_server/config/data/cyclecloud_account.json
+    content: |
+      [
+        {
+          "AdType": "Application.Setting",
+          "Name": "cycleserver.installation.initial_user",
+          "Value": "hpcadmin"
+        },
+        {
+          "AdType": "AuthenticatedUser",
+          "Name": "hpcadmin",
+          "RawPassword": "",
+          "Superuser": true
+        },
+        {
+          "AdType": "Credential",
+          "CredentialType": "PublicKey",
+          "Name": "hpcadmin/public",
+          "PublicKey": ""
+        },
+        {
+          "AdType": "Application.Setting",
+          "Name": "cycleserver.installation.complete",
+          "Value": true
+        }
+      ]
+
+
+runcmd:
+  - /opt/cycle_server/cycle_server stop
+  - semanage fcontext -a -t bin_t "/opt/cycle_server(/.*)?"
+  - restorecon -v /opt/cycle_server
+  - sed -i 's_\(webServerSslPort\s*=\s*\)8443_\1443_' /opt/cycle_server/config/cycle_server.properties
+  - sed -i 's_\(webServerEnableHttps\s*=\s*\)false_\1true_' /opt/cycle_server/config/cycle_server.properties
+  - sed -i 's_\(webServerRedirectHttp\s*=\s*\)false_\1true_' /opt/cycle_server/config/cycle_server.properties
+  - groupadd -g 20001 hpcadmin
+  - useradd -g 20001 -u 20001 -m -s /bin/bash hpcadmin
+  - passwd -d hpcadmin
+  - su - hpcadmin -c "ssh-keygen -t ed25519 -N '' -f /home/hpcadmin/.ssh/id_ed25519"
+  # - su - hpcadmin -c "cat /home/hpcadmin/.ssh/id_ed25519.pub >> /home/hpcadmin/.ssh/authorized_keys"
+  # - su - hpcadmin -c "chmod 600 /home/hpcadmin/.ssh/authorized_keys"
+  - su - hpcadmin -c "chmod 700 /home/hpcadmin/.ssh"
+  - az login --identity
+  - hpcadmin_cc_passwd=$(az keyvault secret show --name "hpcadmin-password" --vault-name "${key_vault_name}" --query "value" -otsv)
+  # NB, | is used instead of _ because randomized password may contain _s and that confuses sed.
+  - printf -v sed_set_passwd 's|\("RawPassword"\s*:\s*\)""|\\1"%s"|' "$hpcadmin_cc_passwd"
+  - sed -i "$sed_set_passwd" "/home/srvadmin/cyclecloud_account.json"
+  - hpcadmin_cc_pubkey=$(cat /home/hpcadmin/.ssh/id_ed25519.pub)
+  - printf -v sed_set_pubkey 's|\("PublicKey"\s*:\s*\)""|\\1"%s"|' "$hpcadmin_cc_pubkey"
+  - sed -i "$sed_set_pubkey" "/home/srvadmin/cyclecloud_account.json"
+  - cp "/home/srvadmin/cyclecloud_account.json" "/opt/cycle_server/config/data/cyclecloud_account.json"
+  - passwd -e hpcadmin
+  - /opt/cycle_server/cycle_server start
