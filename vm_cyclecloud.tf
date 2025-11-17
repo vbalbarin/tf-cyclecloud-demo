@@ -109,6 +109,12 @@ module "vm_cc" {
       description                = "Assign Blob Storage Contributor to this VM over CycleCloud locker"
       principal_type             = "ServicePrincipal"
     }
+    role_assignment_3 = {
+      scope_resource_id          = module.key_vault.resource_id
+      role_definition_id_or_name = "Key Vault Secrets User"
+      description                = "Assign Key Vault Secrets User to this VM over key vault"
+      principal_type             = "ServicePrincipal"
+    }
   }
 
   enable_telemetry = var.telemetry_enabled
