@@ -124,10 +124,10 @@ module "vm_cc" {
 
   depends_on = []
 }
-output "vm_cc_resourceid" {
+output "vm_cc_resource_id" {
   value = module.vm_cc[0].resource_id
 }
 
-output "vm_cc_managedid" {
+output "vm_cc_managed_id_principal_id" {
   value = module.vm_cc[0].system_assigned_mi_principal_id
 }

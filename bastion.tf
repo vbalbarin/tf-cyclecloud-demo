@@ -52,3 +52,7 @@ module "bastion" {
   // https://learn.microsoft.com/en-us/azure/bastion/kerberos-authentication-portal
   // depends_on = [azurerm_virtual_network_dns_servers.vnet_dns]
 }
+
+output "bastion_resource_id" {
+  value = module.bastion.resource_id
+}
