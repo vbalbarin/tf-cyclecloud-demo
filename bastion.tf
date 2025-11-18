@@ -54,5 +54,5 @@ module "bastion" {
 }
 
 output "bastion_resource_id" {
-  value = module.bastion.resource_id
+  value = module.bastion[0].resource_id
 }
