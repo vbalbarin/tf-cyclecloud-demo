@@ -113,7 +113,7 @@ runcmd:
   - /opt/cycle_server/cycle_server start
   - cp "/home/srvadmin/cyclecloud_provider.json" "/home/hpcadmin/cyclecloud_provider.json"
   - chown hpcadmin:hpcadmin "/home/hpcadmin/cyclecloud_provider.json"
-  - printf -v cyclecloud8_init '/usr/local/bin/cyclecloud initialize --loglevel=debug --batch --url=https://localhost --verify-ssl=false --username=hpcadmin --password="%s"' "$hpcadmin_cc_passwd"
+  - printf -v cyclecloud8_init '/usr/local/bin/cyclecloud initialize --loglevel=debug --batch --url=https://localhost --verify-ssl=false --username=hpcadmin --password=%s' "$hpcadmin_cc_passwd"
   - su - hpcadmin --login -c "$cyclecloud8_init"
   - su - hpcadmin --login -c '/usr/local/bin/cyclecloud account create -f /home/hpcadmin/cyclecloud_provider.json'
   - passwd -e hpcadmin
