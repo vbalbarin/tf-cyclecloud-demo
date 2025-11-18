@@ -30,6 +30,8 @@ package_upgrade: true
 packages:
   - vim
   - git
+  - python38
+  - unzip
   - tmux
   - policycoreutils-python-utils
   - azure-cli
@@ -83,6 +85,9 @@ write_files:
       }
 
 runcmd:
+  - update-alternatives --set python3 /usr/bin/python3.8
+  - unzip /opt/cycle_server/tools/cyclecloud-cli.zip -d /tmp
+  - python3 /tmp/cyclecloud-cli-installer/install.py -y --installdir /home/hpcadmin/.cycle --system
   - /opt/cycle_server/cycle_server stop
   - semanage fcontext -a -t bin_t "/opt/cycle_server(/.*)?"
   - restorecon -v /opt/cycle_server
@@ -105,5 +110,10 @@ runcmd:
   - printf -v sed_set_pubkey 's|\("PublicKey"\s*:\s*\)""|\\1"%s"|' "$hpcadmin_cc_pubkey"
   - sed -i "$sed_set_pubkey" "/home/srvadmin/cyclecloud_account.json"
   - cp "/home/srvadmin/cyclecloud_account.json" "/opt/cycle_server/config/data/cyclecloud_account.json"
-  - passwd -e hpcadmin
   - /opt/cycle_server/cycle_server start
+  - cp "/home/srvadmin/cyclecloud_provider.json" "/home/hpcadmin/cyclecloud_provider.json"
+  - chown hpcadmin:hpcadmin "/home/hpcadmin/cyclecloud_provider.json"
+  - printf -v cyclecloud8_init '/usr/local/bin/cyclecloud initialize --loglevel=debug --batch --url=https://localhost --verify-ssl=false --username=hpcadmin --password="%s"' "$hpcadmin_cc_passwd"
+  - su - hpcadmin --login -c "$cyclecloud8_init"
+  - su - hpcadmin --login -c '/usr/local/bin/cyclecloud account create -f /home/hpcadmin/cyclecloud_provider.json'
+  - passwd -e hpcadmin
