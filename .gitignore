@@ -12,3 +12,4 @@ backend.tf
 
 *.skip
 *.bak
+*.user.*
