@@ -1,17 +1,4 @@
 #cloud-config
-disk_setup:
-  /dev/nvme0n2:
-    table_type: gpt
-    layout: true
-    overwrite: true
-
-fs_setup:
-  - device: /dev/nvme0n2
-    partition: auto
-    filesystem: xfs
-
-mounts:
-  - ["/dev/nvme0n2p1", "/opt/cycle_server", "xfs", "defaults", "0", "2"]
 
 yum_repos:
   cyclecloud:
@@ -30,7 +17,7 @@ package_upgrade: true
 packages:
   - vim
   - git
-  - python38
+  - python39
   - unzip
   - tmux
   - policycoreutils-python-utils
@@ -85,15 +72,24 @@ write_files:
       }
 
 runcmd:
-  - update-alternatives --set python3 /usr/bin/python3.8
-  - unzip /opt/cycle_server/tools/cyclecloud-cli.zip -d /tmp
-  - python3 /tmp/cyclecloud-cli-installer/install.py -y --installdir /home/hpcadmin/.cycle --system
+  - parted -a opt "/dev/nvme0n2" --script mklabel gpt mkpart primary xfs 0% 100%
+  - timeout 30s sh -c 'while [ $(blkid /dev/nvme0n2p1 | grep -c xfs) -ne 1 ]; do sleep 1; done'
+  - mkfs.xfs "/dev/nvme0n2p1"
+  - partprobe "/dev/nvme0n2p1"
+  - echo "/dev/nvme0n2p1 $cycle_server_root xfs defaults,nofail 1 2" | tee -a /etc/fstab 2>&1
+  - mkdir -p "/opt/cycle_server"
+  - systemctl daemon-reload
+  - mount -a
+  - update-alternatives --set python3 /usr/bin/python3.9
+  - python3 -m pip install --upgrade pip
   - /opt/cycle_server/cycle_server stop
   - semanage fcontext -a -t bin_t "/opt/cycle_server(/.*)?"
   - restorecon -v /opt/cycle_server
-  - sed -i 's_\(webServerSslPort\s*=\s*\)8443_\1443_' /opt/cycle_server/config/cycle_server.properties
-  - sed -i 's_\(webServerEnableHttps\s*=\s*\)false_\1true_' /opt/cycle_server/config/cycle_server.properties
-  - sed -i 's_\(webServerRedirectHttp\s*=\s*\)false_\1true_' /opt/cycle_server/config/cycle_server.properties
+  - sed -i 's_\(webServerMaxHeapSize\s*\)=\s*\(.*\)_\1=4096M_' /opt/cycle_server/config/cycle_server.properties
+  - sed -i 's_\(webServerPort\s*\)=\s*\(.*\)*_\1=80_' /opt/cycle_server/config/cycle_server.properties
+  - sed -i 's_\(webServerSslPort\s*\)=\s*\(.*\)*_\1=443_' /opt/cycle_server/config/cycle_server.properties
+  - sed -i 's_\(webServerEnableHttps\s*\)=\s*\(.*\)_\1=true_' /opt/cycle_server/config/cycle_server.properties
+  - sed -i 's_\(webServerRedirectHttp\s*\)=\s*\(.*\)_\1=true_' /opt/cycle_server/config/cycle_server.properties
   - groupadd -g 20001 hpcadmin
   - useradd -g 20001 -u 20001 -m -s /bin/bash hpcadmin
   - passwd -d hpcadmin
@@ -110,10 +106,18 @@ runcmd:
   - printf -v sed_set_pubkey 's|\("PublicKey"\s*:\s*\)""|\\1"%s"|' "$hpcadmin_cc_pubkey"
   - sed -i "$sed_set_pubkey" "/home/srvadmin/cyclecloud_account.json"
   - cp "/home/srvadmin/cyclecloud_account.json" "/opt/cycle_server/config/data/cyclecloud_account.json"
+  - restorecon -v /opt/cycle_server
+  # - sleep 30s
   - /opt/cycle_server/cycle_server start
+  - sleep 30s
+  - unzip /opt/cycle_server/tools/cyclecloud-cli.zip -d /tmp/cyclecloud_cli_installer
+  - python3 /tmp/cyclecloud_cli_installer/cyclecloud-cli-installer/install.py -y --installdir /home/hpcadmin/.cycle --system
   - cp "/home/srvadmin/cyclecloud_provider.json" "/home/hpcadmin/cyclecloud_provider.json"
   - chown hpcadmin:hpcadmin "/home/hpcadmin/cyclecloud_provider.json"
   - printf -v cyclecloud8_init '/usr/local/bin/cyclecloud initialize --loglevel=debug --batch --url=https://localhost --verify-ssl=false --username=hpcadmin --password=%s' "$hpcadmin_cc_passwd"
   - su - hpcadmin --login -c "$cyclecloud8_init"
   - su - hpcadmin --login -c '/usr/local/bin/cyclecloud account create -f /home/hpcadmin/cyclecloud_provider.json'
   - passwd -e hpcadmin
+  - ts=$(date +"%Y-%m-%d_%H-%M-%S")
+  - touch /home/srvadmin/done-$ts.txt
+  - chown srvadmin:srvadmin /home/srvadmin/done-$ts.txt
