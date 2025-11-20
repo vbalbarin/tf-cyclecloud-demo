@@ -17,12 +17,12 @@ package_upgrade: true
 packages:
   - vim
   - git
-  - python39
+  # - python39
   - unzip
   - tmux
   - policycoreutils-python-utils
   - azure-cli
-  - cyclecloud8-${cyclecloud8_ver}
+  # - cyclecloud8-${cyclecloud8_ver}
 
 write_files:
   - path: /home/srvadmin/cyclecloud_account.json # cp . /opt/cycle_server/config/data/cyclecloud_account.json
@@ -76,12 +76,14 @@ runcmd:
   - timeout 30s sh -c 'while [ $(blkid /dev/nvme0n2p1 | grep -c xfs) -ne 1 ]; do sleep 1; done'
   - mkfs.xfs "/dev/nvme0n2p1"
   - partprobe "/dev/nvme0n2p1"
-  - echo "/dev/nvme0n2p1 $cycle_server_root xfs defaults,nofail 1 2" | tee -a /etc/fstab 2>&1
+  - echo "/dev/nvme0n2p1 /opt/cycle_server xfs defaults,nofail 1 2" | tee -a /etc/fstab 2>&1
   - mkdir -p "/opt/cycle_server"
   - systemctl daemon-reload
   - mount -a
+  - dnf -y install python39
   - update-alternatives --set python3 /usr/bin/python3.9
   - python3 -m pip install --upgrade pip
+  - dnf -y install cyclecloud8-${cyclecloud8_ver}
   - /opt/cycle_server/cycle_server stop
   - semanage fcontext -a -t bin_t "/opt/cycle_server(/.*)?"
   - restorecon -v /opt/cycle_server
@@ -120,4 +122,4 @@ runcmd:
   - passwd -e hpcadmin
   - ts=$(date +"%Y-%m-%d_%H-%M-%S")
   - touch /home/srvadmin/done-$ts.txt
-  - chown srvadmin:srvadmin /home/srvadmin/done-$ts.txt
+  - chown srvadmin:srvadmin -R /home/srvadmin
