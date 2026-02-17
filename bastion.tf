@@ -18,14 +18,14 @@ module "bastion_public_ip" {
 }
 
 module "bastion" {
-  count = var.deploy_bastion ? 1 : 0
+  # count = var.deploy_bastion ? 1 : 0
 
   source  = "Azure/avm-res-network-bastionhost/azurerm"
-  version = "~> 0.8.1"
+  version = "~> 0.9.0"
 
-  name                = local.resource_names["bastion"]
-  resource_group_name = azurerm_resource_group.network.name
-  location            = azurerm_resource_group.network.location
+  name      = local.resource_names["bastion"]
+  parent_id = azurerm_resource_group.network.id
+  location = azurerm_resource_group.network.location
 
   copy_paste_enabled     = true
   file_copy_enabled      = false
@@ -54,5 +54,5 @@ module "bastion" {
 }
 
 output "bastion_resource_id" {
-  value = module.bastion[0].resource_id
+  value = module.bastion.resource_id
 }
