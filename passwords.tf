@@ -12,7 +12,7 @@ resource "random_password" "vm_hpcadmin" {
   numeric = true
 
   # Linux-safe
-  override_special = "!@#$%^&*()-_+="
+  override_special = "!@#$%^*()-_+="
 
   # Exclude characters that can cause issues in PowerShell/Windows
   # override_special = "!@#$%^&*()-_=+[]{}|;:,.<>?"
