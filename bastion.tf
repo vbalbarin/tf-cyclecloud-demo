@@ -25,7 +25,7 @@ module "bastion" {
 
   name      = local.resource_names["bastion"]
   parent_id = azurerm_resource_group.network.id
-  location = azurerm_resource_group.network.location
+  location  = azurerm_resource_group.network.location
 
   copy_paste_enabled     = true
   file_copy_enabled      = false
