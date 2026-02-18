@@ -6,23 +6,14 @@ yum_repos:
     baseurl: https://packages.microsoft.com/yumrepos/cyclecloud
     gpgcheck: true
     gpgkey: https://packages.microsoft.com/keys/microsoft.asc
-  azure-cli:
-    name: Azure CLI
-    baseurl: https://packages.microsoft.com/yumrepos/azure-cli
-    gpgcheck: true
-    gpgkey: https://packages.microsoft.com/keys/microsoft.asc
 
 package_update: true
 package_upgrade: true
 packages:
   - vim
   - git
-  # - python39
   - unzip
   - tmux
-  - policycoreutils-python-utils
-  - azure-cli
-  # - cyclecloud8-${cyclecloud8_ver}
 
 write_files:
   - path: /home/srvadmin/cyclecloud_account.json # cp . /opt/cycle_server/config/data/cyclecloud_account.json
@@ -80,13 +71,15 @@ runcmd:
   - mkdir -p "/opt/cycle_server"
   - systemctl daemon-reload
   - mount -a
-  - dnf -y install python39
+  - rpm --import https://packages.microsoft.com/keys/microsoft.asc
+  - dnf install -y https://packages.microsoft.com/config/rhel/9.0/packages-microsoft-prod.rpm
+  - dnf -y install python39 policycoreutils-python-utils azure-cli
   - update-alternatives --set python3 /usr/bin/python3.9
   - python3 -m pip install --upgrade pip
   - dnf -y install cyclecloud8-${cyclecloud8_ver}
   - /opt/cycle_server/cycle_server stop
   - semanage fcontext -a -t bin_t "/opt/cycle_server(/.*)?"
-  - restorecon -v /opt/cycle_server
+  - restorecon -Rv /opt/cycle_server
   - sed -i 's_\(webServerMaxHeapSize\s*\)=\s*\(.*\)_\1=4096M_' /opt/cycle_server/config/cycle_server.properties
   - sed -i 's_\(webServerPort\s*\)=\s*\(.*\)*_\1=80_' /opt/cycle_server/config/cycle_server.properties
   - sed -i 's_\(webServerSslPort\s*\)=\s*\(.*\)*_\1=443_' /opt/cycle_server/config/cycle_server.properties
@@ -108,7 +101,7 @@ runcmd:
   - printf -v sed_set_pubkey 's|\("PublicKey"\s*:\s*\)""|\\1"%s"|' "$hpcadmin_cc_pubkey"
   - sed -i "$sed_set_pubkey" "/home/srvadmin/cyclecloud_account.json"
   - cp "/home/srvadmin/cyclecloud_account.json" "/opt/cycle_server/config/data/cyclecloud_account.json"
-  - restorecon -v /opt/cycle_server
+  - restorecon -Rv /opt/cycle_server
   # - sleep 30s
   - /opt/cycle_server/cycle_server start
   - sleep 30s
