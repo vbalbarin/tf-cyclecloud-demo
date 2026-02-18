@@ -144,12 +144,32 @@ variable "remote_access_ip" {
 
 variable "deploy_vm_cc" {
   type    = bool
-  default = false
+  default = true
+}
+
+
+# az vm image list --location canadacentral \
+#  --publisher almalinux --offer almalinux-x86_64 \
+#  --sku 9-gen2 --all -otable
+
+variable "vm_cc_image_reference" {
+  type = object({
+    publisher = string
+    offer     = string
+    sku       = string
+    version   = string
+  })
+  default = {
+    publisher = "almalinux"
+    offer     = "almalinux-x86_64"
+    sku       = "9-gen2"
+    version   = "9.6.202505220"
+  }
 }
 
 variable "cyclecloud8_ver" {
   type    = string
-  default = "8.7.3-3438"
+  default = "8.8.1-3561"
 }
 
 variable "deploy_dc" {

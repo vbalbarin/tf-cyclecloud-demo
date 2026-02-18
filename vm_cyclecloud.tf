@@ -53,12 +53,7 @@ module "vm_cc" {
 
   extensions = {}
 
-  source_image_reference = {
-    publisher = "almalinux"
-    offer     = "almalinux-x86_64"
-    sku       = "8-gen2"
-    version   = "8.10.2025090501"
-  }
+  source_image_reference = var.vm_cc_image_reference
 
   os_disk = {
     name                 = "OSDisk"
